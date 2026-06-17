@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cortex Bridge</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="taskpane.js" defer></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      padding: 16px;
+      font-size: 13px;
+    }
+    h1 {
+      color: #58a6ff;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status {
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .status.connected { background: #0d2a1a; color: #4caf50; border: 1px solid #1e5c32; }
+    .status.disconnected { background: #2a0d0d; color: #ef5350; border: 1px solid #5c1e1e; }
+    .status.syncing { background: #0d1a2a; color: #58a6ff; border: 1px solid #1e3a5c; }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #58a6ff;
+      color: #0a0a0f;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    button:hover { background: #79b8ff; }
+    button:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .last-sync {
+      color: #666;
+      font-size: 11px;
+      text-align: center;
+    }
+    .summary {
+      margin-top: 12px;
+      padding: 10px;
+      background: #111118;
+      border-radius: 6px;
+      border: 1px solid #222;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #aaa;
+    }
+    .summary strong { color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <h1>&#9679; Cortex Bridge</h1>
+  <div id="status" class="status disconnected">Checking Cortex...</div>
+  <button id="syncBtn" onclick="sendToCortex()" disabled>Send to Cortex</button>
+  <div id="lastSync" class="last-sync"></div>
+  <div id="summary" class="summary" style="display:none"></div>
+</body>
+</html>
