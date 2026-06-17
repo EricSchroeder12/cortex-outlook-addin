@@ -5,16 +5,16 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
   <Id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.1.0</Version>
   <ProviderName>Evolution IT Services</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Cortex Bridge"/>
   <Description DefaultValue="Sends Outlook calendar and email data to Cortex AI assistant"/>
-  <IconUrl DefaultValue="https://localhost:5174/icon.png"/>
-  <HighResolutionIconUrl DefaultValue="https://localhost:5174/icon.png"/>
+  <IconUrl DefaultValue="https://ericschroeder12.github.io/cortex-outlook-addin/icon.png"/>
+  <HighResolutionIconUrl DefaultValue="https://ericschroeder12.github.io/cortex-outlook-addin/icon.png"/>
   <SupportUrl DefaultValue="https://evolutionitservice.com"/>
   <AppDomains>
-    <AppDomain>https://localhost:5174</AppDomain>
+    <AppDomain>https://ericschroeder12.github.io</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
@@ -27,7 +27,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:5174/taskpane.html"/>
+        <SourceLocation DefaultValue="https://ericschroeder12.github.io/cortex-outlook-addin/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
