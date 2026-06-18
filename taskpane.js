@@ -7,9 +7,55 @@ let officeReady = false;
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     officeReady = true;
+    runProbe();            // capability probe FIRST — prove what's reachable
     checkCortexAndSync();
   }
 });
+
+// ── Capability probe ─────────────────────────────────────────────────────────
+// Office.js is scoped to the mailbox the add-in was activated in. New Outlook
+// removed the COM/MAPI path classic Outlook used to enumerate every local
+// store, so a single task pane generally CANNOT read the other 3 accounts.
+// This probe records exactly what THIS activation can reach so we can confirm
+// reachability per account before relying on it. Open the add-in once in each
+// of the 4 accounts and compare the output.
+function runProbe() {
+  const lines = [];
+  const log = (k, v) => lines.push(`${k}: ${v}`);
+  try {
+    const mbx  = Office.context.mailbox;
+    const diag = mbx?.diagnostics || {};
+    const prof = mbx?.userProfile || {};
+    log('host', diag.hostName || '(unknown)');
+    log('hostVersion', diag.hostVersion || '(unknown)');
+    log('OWAView', diag.OWAView || 'n/a (desktop)');
+    log('activeAccount', prof.emailAddress || '(none)');
+    log('displayName', prof.displayName || '(none)');
+    log('accountType', prof.accountType || '(unknown)');
+    log('timeZone', prof.timeZone || '(unknown)');
+    log('restUrl', mbx?.restUrl || '(none)');
+    log('ewsUrl', mbx?.ewsUrl || '(none)');
+
+    // Can we mint a REST token for THIS mailbox? (other mailboxes are not addressable)
+    mbx.getCallbackTokenAsync({ isRest: true }, (r) => {
+      log('restToken', r.status === Office.AsyncResultStatus.Succeeded ? 'OK (this mailbox only)' : `FAILED (${r.error?.message || r.status})`);
+      lines.push('');
+      lines.push('NOTE: Office.js reaches only the active mailbox. To cover all 4');
+      lines.push('accounts, open this add-in once per account (each run POSTs its');
+      lines.push('slice; Cortex merges by account), or use Graph + Google OAuth.');
+      renderProbe(lines.join('\n'));
+      console.log('[Cortex probe]\n' + lines.join('\n'));
+    });
+  } catch (e) {
+    lines.push('probe error: ' + e.message);
+    renderProbe(lines.join('\n'));
+  }
+}
+
+function renderProbe(text) {
+  const el = document.getElementById('probe');
+  if (el) { el.textContent = text; el.style.display = 'block'; }
+}
 
 async function checkCortexAndSync() {
   const running = await isCortexRunning();
@@ -45,6 +91,9 @@ async function sendToCortex() {
     ]);
 
     const payload = {
+      // Top-level account so the Cortex receiver can merge per-account runs
+      // into one unified, account-grouped briefing (path a — per-account run).
+      account: Office.context.mailbox.userProfile?.emailAddress || 'unknown',
       timestamp: new Date().toISOString(),
       calendar,
       emails

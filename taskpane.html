@@ -16,7 +16,7 @@
       font-size: 13px;
     }
     h1 {
-      color: #58a6ff;
+      color: #e07b39;
       font-size: 15px;
       font-weight: 600;
       margin-bottom: 12px;
@@ -36,7 +36,7 @@
     button {
       width: 100%;
       padding: 10px;
-      background: #58a6ff;
+      background: #e07b39;
       color: #0a0a0f;
       border: none;
       border-radius: 6px;
@@ -45,7 +45,9 @@
       cursor: pointer;
       margin-bottom: 10px;
     }
-    button:hover { background: #79b8ff; }
+    button:hover { background: #f08a4a; }
+    button.secondary { background: transparent; color: #e07b39; border: 1px solid #5a3318; }
+    button.secondary:hover { background: #1a1208; }
     button:disabled { background: #333; color: #666; cursor: not-allowed; }
     .last-sync {
       color: #666;
@@ -62,14 +64,42 @@
       line-height: 1.6;
       color: #aaa;
     }
-    .summary strong { color: #58a6ff; }
+    .summary strong { color: #e07b39; }
+    .summary.probe { white-space: pre-wrap; font-family: 'Consolas','Courier New',monospace; font-size: 11px; }
   </style>
 </head>
 <body>
-  <h1>&#9679; Cortex Bridge</h1>
+  <h1>
+    <svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id="cortexBrain" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffb05a"/><stop offset="1" stop-color="#a83a09"/>
+        </linearGradient>
+      </defs>
+      <g fill="url(#cortexBrain)" stroke="url(#cortexBrain)">
+        <ellipse cx="50" cy="44" rx="33" ry="27"/>
+        <circle cx="33" cy="28" r="12"/><circle cx="50" cy="23" r="13"/><circle cx="67" cy="28" r="12"/>
+        <circle cx="23" cy="40" r="12"/><circle cx="77" cy="40" r="12"/>
+        <circle cx="30" cy="55" r="11"/><circle cx="70" cy="55" r="11"/>
+        <line x1="50" y1="60" x2="50" y2="84" stroke-width="15" stroke-linecap="round"/>
+      </g>
+      <g stroke="#5a2006" stroke-opacity="0.55" fill="none">
+        <line x1="50" y1="18" x2="50" y2="62" stroke-width="3.4" stroke-linecap="round"/>
+        <line x1="28" y1="33" x2="41" y2="39" stroke-width="3" stroke-linecap="round"/>
+        <line x1="25" y1="46" x2="40" y2="49" stroke-width="3" stroke-linecap="round"/>
+        <line x1="31" y1="56" x2="44" y2="57" stroke-width="3" stroke-linecap="round"/>
+        <line x1="59" y1="39" x2="72" y2="33" stroke-width="3" stroke-linecap="round"/>
+        <line x1="60" y1="49" x2="75" y2="46" stroke-width="3" stroke-linecap="round"/>
+        <line x1="56" y1="57" x2="69" y2="56" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+    Cortex Bridge
+  </h1>
   <div id="status" class="status disconnected">Checking Cortex...</div>
   <button id="syncBtn" onclick="sendToCortex()" disabled>Send to Cortex</button>
+  <button id="probeBtn" class="secondary" onclick="runProbe()">Run capability probe</button>
   <div id="lastSync" class="last-sync"></div>
   <div id="summary" class="summary" style="display:none"></div>
+  <div id="probe" class="summary probe" style="display:none"></div>
 </body>
 </html>
