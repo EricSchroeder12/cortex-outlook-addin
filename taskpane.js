@@ -38,13 +38,27 @@ function runProbe() {
 
     // Can we mint a REST token for THIS mailbox? (other mailboxes are not addressable)
     mbx.getCallbackTokenAsync({ isRest: true }, (r) => {
-      log('restToken', r.status === Office.AsyncResultStatus.Succeeded ? 'OK (this mailbox only)' : `FAILED (${r.error?.message || r.status})`);
+      const restOk = r.status === Office.AsyncResultStatus.Succeeded;
+      log('restToken', restOk ? 'OK (this mailbox only)' : `FAILED (${r.error?.message || r.status})`);
       lines.push('');
       lines.push('NOTE: Office.js reaches only the active mailbox. To cover all 4');
       lines.push('accounts, open this add-in once per account (each run POSTs its');
       lines.push('slice; Cortex merges by account), or use Graph + Google OAuth.');
       renderProbe(lines.join('\n'));
       console.log('[Cortex probe]\n' + lines.join('\n'));
+
+      // Report capabilities to Cortex so the bridge diagnostics panel can show
+      // a per-account verdict even before a full sync runs.
+      const diagnostics = {
+        host:        diag.hostName || null,
+        hostVersion: diag.hostVersion || null,
+        accountType: prof.accountType || null,
+        timeZone:    prof.timeZone || null,
+        restUrl:     mbx?.restUrl || null,
+        restToken:   restOk ? 'ok' : 'failed',
+        healthy:     restOk && !!mbx?.restUrl,
+      };
+      postProbe(prof.emailAddress || 'unknown', diagnostics);
     });
   } catch (e) {
     lines.push('probe error: ' + e.message);
@@ -55,6 +69,18 @@ function runProbe() {
 function renderProbe(text) {
   const el = document.getElementById('probe');
   if (el) { el.textContent = text; el.style.display = 'block'; }
+}
+
+// POST probe/capability results to the Cortex bridge (best-effort).
+async function postProbe(account, diagnostics) {
+  try {
+    await fetch('http://localhost:5174/outlook-probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account, diagnostics, timestamp: new Date().toISOString() }),
+      signal: AbortSignal.timeout(3000),
+    });
+  } catch { /* Cortex not running — probe still shows locally in the pane */ }
 }
 
 async function checkCortexAndSync() {
@@ -90,11 +116,21 @@ async function sendToCortex() {
       getRecentEmails()
     ]);
 
+    const mbx = Office.context.mailbox;
     const payload = {
       // Top-level account so the Cortex receiver can merge per-account runs
       // into one unified, account-grouped briefing (path a — per-account run).
-      account: Office.context.mailbox.userProfile?.emailAddress || 'unknown',
+      account: mbx.userProfile?.emailAddress || 'unknown',
       timestamp: new Date().toISOString(),
+      diagnostics: {
+        host:        mbx.diagnostics?.hostName || null,
+        hostVersion: mbx.diagnostics?.hostVersion || null,
+        accountType: mbx.userProfile?.accountType || null,
+        timeZone:    mbx.userProfile?.timeZone || null,
+        restUrl:     mbx.restUrl || null,
+        restToken:   'ok',          // we just used it to fetch calendar+mail
+        healthy:     true,
+      },
       calendar,
       emails
     };
